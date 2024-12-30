@@ -47,6 +47,7 @@ impl Editor {
     pub fn repl(&mut self) -> Result<(), std::io::Error> {
         self.initialize()?;
         loop {
+            Terminal::move_cursor(self.cursor_x, self.cursor_y)?;
             match crossterm::event::read()? {
                 crossterm::event::Event::Key(key_event) => match key_event.code {
                     crossterm::event::KeyCode::Char('q')
@@ -58,6 +59,26 @@ impl Editor {
                         println!("Tab Pressed \r");
                         Terminal::clear_screen()?;
                         Terminal::move_cursor(self.cursor_x, self.cursor_y)?;
+                    }
+                    crossterm::event::KeyCode::Up => {
+                        if self.cursor_y > 0 {
+                            self.cursor_y -= 1;
+                        }
+                    }
+                    crossterm::event::KeyCode::Down => {
+                        if self.cursor_y == 0 || self.cursor_y <= Terminal::get_size().unwrap().1 {
+                            self.cursor_y += 1;
+                        }
+                    }
+                    crossterm::event::KeyCode::Right => {
+                        if self.cursor_x == 0 || self.cursor_x <= Terminal::get_size().unwrap().0 {
+                            self.cursor_x += 1;
+                        }
+                    }
+                    crossterm::event::KeyCode::Left => {
+                        if self.cursor_x > 0 {
+                            self.cursor_x -= 1;
+                        }
                     }
                     _ => (),
                 },
