@@ -1,11 +1,6 @@
-use std::io::Read;
-
+#![warn(clippy::all, clippy::pedantic)]
+mod editor;
 fn main() {
-    for b in std::io::stdin().bytes() {
-        let c = b.unwrap() as char;
-        if c == 'q' {
-            break;
-        }
-        print!("{}", c);
-    }
+    let editor = editor::Editor::default();
+    editor.run();
 }
