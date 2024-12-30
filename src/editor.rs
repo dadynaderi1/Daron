@@ -7,6 +7,13 @@ enum Mode {
     Normal,
     _Insert,
 }
+
+impl Default for Mode {
+    fn default() -> Self {
+        Mode::Normal
+    }
+}
+#[derive(Default)]
 pub struct Editor {
     should_quit: bool,
     _mode: Mode,
@@ -27,7 +34,7 @@ impl Editor {
             cursor_y: 0,
             cols: size.0,
             rows: size.1,
-            view: viewer::Viewer,
+            view: Viewer::default(),
         }
     }
     pub fn initialize(&mut self) -> Result<(), std::io::Error> {

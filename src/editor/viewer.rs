@@ -1,16 +1,26 @@
 use super::handler::terminal::Terminal;
 mod buffer;
+use buffer::Buffer;
 // Enviromental variables!
 const NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 // End of enviromental variables
-pub struct Viewer;
+
+#[derive(Default)]
+pub struct Viewer {
+    buffer: Buffer,
+}
 
 impl Viewer {
     pub fn renderer(&mut self, rows: u16, cols: u16) -> Result<(), std::io::Error> {
-        for i in 0..rows + 1 {
-            Terminal::move_cursor(0, i)?;
-            if i == rows / 2 {
+        for current_row in 0..rows + 1 {
+            Terminal::move_cursor(0, current_row)?;
+            if let Some(line) = self.buffer.lines.get(current_row as usize) {
+                Terminal::print(line)?;
+                Terminal::print("\r\n")?;
+                continue;
+            }
+            if current_row == rows / 2 {
                 Self::splash_screen(cols)?;
             } else {
                 Terminal::print("~")?;

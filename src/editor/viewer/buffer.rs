@@ -1,5 +1,5 @@
 pub struct Buffer {
-    lines: Vec<String>,
+    pub lines: Vec<String>,
 }
 
 impl Default for Buffer {
