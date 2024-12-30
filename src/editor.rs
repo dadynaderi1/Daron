@@ -1,6 +1,7 @@
-use crossterm;
 mod handler;
-use handler::terminal::{self, Terminal};
+use std::io::Write;
+
+use handler::terminal::Terminal;
 enum Mode {
     Normal,
     _Insert,
@@ -10,22 +11,28 @@ pub struct Editor {
     _mode: Mode,
     cursor_x: u16,
     cursor_y: u16,
+    cols: u16,
+    rows: u16,
 }
 
 impl Editor {
     pub fn default() -> Self {
+        let size = Terminal::get_size().unwrap();
         Editor {
             should_quit: false,
             _mode: Mode::Normal,
             cursor_x: 0,
             cursor_y: 0,
+            cols: size.0,
+            rows: size.1,
         }
     }
     fn initialize(&mut self) -> Result<(), std::io::Error> {
+        Terminal::hide_cursor()?;
         Terminal::initialize()?;
         self.draw_rows();
         Terminal::move_cursor(self.cursor_x + 1, self.cursor_y)?;
-
+        Terminal::show_cursor()?;
         Ok(())
     }
     fn purge(&mut self) -> Result<(), std::io::Error> {
@@ -33,8 +40,7 @@ impl Editor {
         Ok(())
     }
     fn draw_rows(&mut self) {
-        let terminal_size = Terminal::get_size().unwrap().1;
-        for i in 0..terminal_size {
+        for i in 0..self.rows {
             Terminal::move_cursor(0, i).unwrap();
             println!("~\r");
         }
@@ -66,12 +72,12 @@ impl Editor {
                         }
                     }
                     crossterm::event::KeyCode::Down => {
-                        if self.cursor_y == 0 || self.cursor_y <= Terminal::get_size().unwrap().1 {
+                        if self.cursor_y == 0 || self.cursor_y <= self.rows {
                             self.cursor_y += 1;
                         }
                     }
                     crossterm::event::KeyCode::Right => {
-                        if self.cursor_x == 0 || self.cursor_x <= Terminal::get_size().unwrap().0 {
+                        if self.cursor_x == 0 || self.cursor_x <= self.cols {
                             self.cursor_x += 1;
                         }
                     }
@@ -82,11 +88,19 @@ impl Editor {
                     }
                     _ => (),
                 },
-                _ => (),
+                crossterm::event::Event::FocusGained => todo!(),
+                crossterm::event::Event::FocusLost => todo!(),
+                crossterm::event::Event::Mouse(mouse_event) => todo!("{:?}", mouse_event),
+                crossterm::event::Event::Paste(_) => todo!(),
+                crossterm::event::Event::Resize(x, y) => {
+                    self.cols = x;
+                    self.rows = y;
+                }
             }
             if self.should_quit {
                 break;
             }
+            std::io::stdout().flush()?;
         }
         self.purge()?;
         Ok(())
