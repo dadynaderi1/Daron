@@ -25,7 +25,7 @@ impl Terminal {
         //std::io::stdout().flush()?;
         Ok(())
     }
-    pub fn print<T: core::fmt::Display>(string: T) -> Result<(), std::io::Error> {
+    pub fn print(string: &str) -> Result<(), std::io::Error> {
         Self::queue_command(crossterm::style::Print(string))?;
         Ok(())
     }

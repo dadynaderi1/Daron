@@ -1,10 +1,8 @@
 mod handler;
-use std::io::Write;
-// Enviromental variables!
-const NAME: &str = env!("CARGO_PKG_NAME");
-const VERSION: &str = env!("CARGO_PKG_VERSION");
-// End of enviromental variables
+mod viewer;
 use handler::terminal::Terminal;
+use std::io::Write;
+use viewer::Viewer;
 enum Mode {
     Normal,
     _Insert,
@@ -16,6 +14,7 @@ pub struct Editor {
     cursor_y: u16,
     cols: u16,
     rows: u16,
+    view: Viewer,
 }
 
 impl Editor {
@@ -28,44 +27,22 @@ impl Editor {
             cursor_y: 0,
             cols: size.0,
             rows: size.1,
+            view: viewer::Viewer,
         }
     }
-    fn initialize(&mut self) -> Result<(), std::io::Error> {
+    pub fn initialize(&mut self) -> Result<(), std::io::Error> {
         Terminal::hide_cursor()?;
         Terminal::initialize()?;
-        self.draw_rows()?;
+        self.view.renderer(self.rows, self.cols)?;
         Terminal::move_cursor(self.cursor_x + 1, self.cursor_y)?;
         Terminal::show_cursor()?;
         Ok(())
     }
-    fn purge(&mut self) -> Result<(), std::io::Error> {
+    pub fn purge(&mut self) -> Result<(), std::io::Error> {
         Terminal::purge()?;
         Ok(())
     }
-    fn draw_rows(&mut self) -> Result<(), std::io::Error> {
-        for i in 0..self.rows {
-            Terminal::move_cursor(0, i)?;
-            if i == self.rows / 2 {
-                self.splash_screen()?;
-            } else {
-                Terminal::print("~")?;
-            }
-        }
-        Ok(())
-    }
-    fn splash_screen(&mut self) -> Result<(), std::io::Error> {
-        //Terminal::show_cursor().unwrap();
-        //Terminal::move_cursor(self.cols / 2 - 5, self.rows / 2).unwrap();
-        let mut name = format!("{NAME} editor -- version: {VERSION}");
-        let cols = self.cols as usize;
-        let padding = (cols - name.len()) / 2;
-        let spaces = " ".repeat(padding - 1);
-        name = format!("~{spaces}{name}");
-        name.truncate(cols);
-        Terminal::print(name)?;
-        Ok(())
-        //Terminal::hide_cursor().unwrap();
-    }
+
     pub fn run(&mut self) {
         if let Err(err) = self.repl() {
             panic!("{err:#?}")
