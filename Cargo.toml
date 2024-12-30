@@ -2,6 +2,6 @@
 name = "Daron"
 version = "0.1.0"
 edition = "2021"
-
+include = ["./src","./src/Handlers","./src/Handlers/Terminal/"]
 [dependencies]
 crossterm = "0.28.1"
