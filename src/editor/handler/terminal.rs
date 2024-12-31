@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use crossterm::{self, QueueableCommand};
+use crossterm::{self, style::Stylize, QueueableCommand};
 pub struct Terminal;
 // TODO:: Handling errors with custom types
 impl Terminal {
@@ -46,6 +46,52 @@ impl Terminal {
         Self::queue_command(crossterm::cursor::Show)?;
         //std::io::stdout().flush()?;
         Ok(())
+    }
+    pub fn draw_statusline(
+        last_row: u16,
+        last_col: u16,
+        cursor_x: &u16,
+        cursor_y: &u16,
+        mode: &crate::editor::Mode,
+    ) -> Result<(), std::io::Error> {
+        let mode_name = format!("  {:?} ", mode);
+        let file = "  src/helloWorld.txt  ".to_string();
+        let cursor_position = format!(" {}:{} ", cursor_x, cursor_y);
+        let file_width = last_col - mode_name.len() as u16 - cursor_position.len() as u16 - 2;
+        let seperator = "\u{e0bc}".to_string();
+        let reverse_seperator = "\u{e0be}".to_string();
+        Self::move_cursor(0, last_row)?;
+        Self::queue_command(crossterm::style::PrintStyledContent(
+            mode_name
+                .to_uppercase()
+                .bold()
+                .with(crossterm::style::Color::Black)
+                .on(Self::color(130, 170, 255)?),
+        ))?;
+        Self::queue_command(crossterm::style::PrintStyledContent(
+            seperator
+                .with(Self::color(130, 170, 255)?)
+                .on(Self::color(30, 32, 48)?),
+        ))?;
+        Self::queue_command(crossterm::style::PrintStyledContent(
+            format!("{:<width$}", file, width = file_width as usize)
+                .white()
+                .bold()
+                .on(Self::color(30, 32, 48)?),
+        ))?;
+        Self::queue_command(crossterm::style::PrintStyledContent(
+            reverse_seperator
+                .with(Self::color(168, 139, 223)?)
+                .on(Self::color(30, 32, 48)?),
+        ))?;
+        Self::queue_command(crossterm::style::PrintStyledContent(
+            cursor_position.black().on(Self::color(168, 139, 223)?),
+        ))?;
+        std::io::stdout().flush()?;
+        Ok(())
+    }
+    fn color(r: u8, g: u8, b: u8) -> Result<crossterm::style::Color, std::io::Error> {
+        Ok(crossterm::style::Color::Rgb { r, g, b })
     }
     fn queue_command<T: crossterm::Command>(command: T) -> Result<(), std::io::Error> {
         std::io::stdout().queue(command)?;
