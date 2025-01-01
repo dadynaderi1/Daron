@@ -1,7 +1,17 @@
-use std::io::Write;
-mod ui;
 use crossterm::{self, style::Stylize, QueueableCommand};
+use std::io::Write;
 pub struct Terminal;
+pub struct Position(pub u16, pub u16);
+
+impl Position {
+    pub fn default() -> Self {
+        Self(0, 0)
+    }
+    pub fn terminal_size() -> Self {
+        let size = crossterm::terminal::size().unwrap();
+        Self(size.0, size.1)
+    }
+}
 // TODO:: Handling errors with custom types
 impl Terminal {
     pub fn initialize() -> Result<(), std::io::Error> {

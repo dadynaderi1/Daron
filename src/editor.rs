@@ -1,12 +1,13 @@
 mod handler;
 mod viewer;
-use crossterm::event;
+use anyhow::Result;
+use crossterm::ExecutableCommand;
+use handler::terminal::Position;
 use handler::terminal::Terminal;
 use std::io::Write;
 use viewer::Viewer;
-
 #[derive(Debug)]
-enum Mode {
+pub enum Mode {
     Normal,
     Insert,
 }
@@ -16,12 +17,7 @@ enum Action {
     MoveLeft,
     MoveRight,
 }
-impl Default for Mode {
-    fn default() -> Self {
-        Mode::Normal
-    }
-}
-#[derive(Default)]
+
 pub struct Editor {
     should_quit: bool,
     mode: Mode,
@@ -34,12 +30,13 @@ pub struct Editor {
 
 impl Editor {
     pub fn default() -> Self {
-        let size = Terminal::get_size().unwrap();
+        let size = Position::terminal_size();
+        let cursor_pos = Position::default();
         Editor {
             should_quit: false,
             mode: Mode::Normal,
-            cursor_x: 0,
-            cursor_y: 0,
+            cursor_x: cursor_pos.0,
+            cursor_y: cursor_pos.1,
             cols: size.0,
             rows: size.1,
             view: Viewer::default(),
@@ -80,56 +77,29 @@ impl Editor {
                 }
                 _ => (),
             },
-            crossterm::event::Event::FocusGained => todo!(),
-            crossterm::event::Event::FocusLost => todo!(),
-            crossterm::event::Event::Mouse(mouse_event) => todo!("{:?}", mouse_event),
-            crossterm::event::Event::Paste(_) => todo!(),
+
             crossterm::event::Event::Resize(x, y) => {
                 self.cols = x;
                 self.rows = y;
             }
+            _ => (),
         }
         Ok(())
     }
     fn handle_insert_mode(&mut self) -> Result<(), std::io::Error> {
         match crossterm::event::read()? {
             crossterm::event::Event::Key(event) => match event.code {
+                crossterm::event::KeyCode::Char(char) => {
+                    std::io::stdout().execute(crossterm::style::Print(char))?;
+                    self.cursor_x += 1;
+                }
                 crossterm::event::KeyCode::Esc => {
                     self.mode = Mode::Normal;
                 }
-                event::KeyCode::Backspace => todo!(),
-                event::KeyCode::Enter => todo!(),
-                event::KeyCode::Left => todo!(),
-                event::KeyCode::Right => todo!(),
-                event::KeyCode::Up => todo!(),
-                event::KeyCode::Down => todo!(),
-                event::KeyCode::Home => todo!(),
-                event::KeyCode::End => todo!(),
-                event::KeyCode::PageUp => todo!(),
-                event::KeyCode::PageDown => todo!(),
-                event::KeyCode::Tab => todo!(),
-                event::KeyCode::BackTab => todo!(),
-                event::KeyCode::Delete => todo!(),
-                event::KeyCode::Insert => todo!(),
-                event::KeyCode::F(_) => todo!(),
-                event::KeyCode::Char(_) => todo!(),
-                event::KeyCode::Null => todo!(),
-                event::KeyCode::CapsLock => todo!(),
-                event::KeyCode::ScrollLock => todo!(),
-                event::KeyCode::NumLock => todo!(),
-                event::KeyCode::PrintScreen => todo!(),
-                event::KeyCode::Pause => todo!(),
-                event::KeyCode::Menu => todo!(),
-                event::KeyCode::KeypadBegin => todo!(),
-                event::KeyCode::Media(media_key_code) => todo!(),
-                event::KeyCode::Modifier(modifier_key_code) => todo!(),
+                _ => (),
             },
-            event::Event::FocusGained => todo!(),
-            event::Event::FocusLost => todo!(),
-            event::Event::Key(key_event) => todo!(),
-            event::Event::Mouse(mouse_event) => todo!(),
-            event::Event::Paste(_) => todo!(),
-            event::Event::Resize(_, _) => todo!(),
+
+            _ => (),
         }
         Ok(())
     }

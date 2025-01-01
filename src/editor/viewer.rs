@@ -19,9 +19,6 @@ impl Viewer {
                 Terminal::print(line)?;
                 Terminal::print("\r\n")?;
                 continue;
-            }
-            if current_row == rows / 2 {
-                Self::splash_screen(cols)?;
             } else {
                 Terminal::print("~")?;
             }
@@ -30,16 +27,15 @@ impl Viewer {
         Ok(())
     }
     pub fn splash_screen(cols: u16) -> Result<(), std::io::Error> {
-        //Terminal::show_cursor().unwrap();
+        Terminal::show_cursor().unwrap();
         //Terminal::move_cursor(self.cols / 2 - 5, self.rows / 2).unwrap();
-        //let mut name = format!("{NAME} editor -- version: {VERSION}");
-        //let cols = cols as usize;
-        //let padding = (cols - name.len()) / 2;
-        //let spaces = " ".repeat(padding - 1);
-        //name = format!("~{spaces}{name}");
-        //name.truncate(cols);
-        //Terminal::print(&name)?;
+        let mut name = format!("{NAME} editor -- version: {VERSION}");
+        let cols = cols as usize;
+        let padding = (cols - name.len()) / 2;
+        let spaces = " ".repeat(padding - 1);
+        name = format!("~{spaces}{name}");
+        name.truncate(cols);
+        Terminal::print(&name)?;
         Ok(())
-        //Terminal::hide_cursor().unwrap();
     }
 }
