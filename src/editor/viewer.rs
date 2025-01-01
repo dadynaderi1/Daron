@@ -6,9 +6,22 @@ const NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 // End of enviromental variables
 
-#[derive(Default)]
 pub struct Viewer {
     buffer: Buffer,
+}
+impl Default for Viewer {
+    fn default() -> Self {
+        let args: Vec<String> = std::env::args().collect();
+        if let Some(file) = args.get(1) {
+            Self {
+                buffer: Buffer::new(file.to_string()),
+            }
+        } else {
+            Self {
+                buffer: Buffer::default(),
+            }
+        }
+    }
 }
 
 impl Viewer {
