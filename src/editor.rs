@@ -109,7 +109,6 @@ impl Editor {
                 event::KeyCode::F(_) => todo!(),
                 event::KeyCode::Char(_) => todo!(),
                 event::KeyCode::Null => todo!(),
-                event::KeyCode::Esc => todo!(),
                 event::KeyCode::CapsLock => todo!(),
                 event::KeyCode::ScrollLock => todo!(),
                 event::KeyCode::NumLock => todo!(),

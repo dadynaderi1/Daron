@@ -1,11 +1,14 @@
 use std::io::Write;
-
+mod ui;
 use crossterm::{self, style::Stylize, QueueableCommand};
 pub struct Terminal;
 // TODO:: Handling errors with custom types
 impl Terminal {
     pub fn initialize() -> Result<(), std::io::Error> {
         crossterm::terminal::enable_raw_mode()?;
+        Self::queue_command(crossterm::style::SetBackgroundColor(Self::color(
+            34, 36, 54,
+        )?))?;
         Self::queue_command(crossterm::terminal::EnterAlternateScreen)?;
         Self::clear_screen()?;
         Self::move_cursor(0, 0)?;
