@@ -10,7 +10,12 @@ enum Mode {
     Normal,
     Insert,
 }
-
+enum Action {
+    MoveDown,
+    MoveUp,
+    MoveLeft,
+    MoveRight,
+}
 impl Default for Mode {
     fn default() -> Self {
         Mode::Normal
